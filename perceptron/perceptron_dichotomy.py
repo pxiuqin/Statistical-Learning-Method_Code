@@ -31,7 +31,7 @@ def loadData(fileName):
     for line in fr.readlines():
         # 对每一行数据按切割符号','进行切割，返回字段列表
         curLine = line.strip().split(',')
-
+        
         # Mnsit有0-9是个标记，由于是二分类任务，所以将>=5的作为1，<5为-1
         if int(curLine[0]) >= 5:
             labelArr.append(1)
@@ -159,10 +159,10 @@ if __name__ == '__main__':
     start = time.time()
 
     #获取训练集及标签
-    trainData, trainLabel = loadData('../Mnist/mnist_train.csv')
+    trainData, trainLabel = loadData('d:\codes\opensource\ML\Statistical-Learning-Method_Code\Mnist\mnist_train.csv')
 
     #获取测试集及标签
-    testData, testLabel = loadData('../Mnist/mnist_test.csv')
+    testData, testLabel = loadData('d:\codes\opensource\ML\Statistical-Learning-Method_Code\Mnist\mnist_test.csv')
 
     #训练获得权重
     w, b = perceptron(trainData, trainLabel, iter = 30)
@@ -175,7 +175,7 @@ if __name__ == '__main__':
 
     #显示正确率
     print('accuracy rate is:', accruRate)
-    
+
     #显示用时时长
     print('time span:', end - start)
 
