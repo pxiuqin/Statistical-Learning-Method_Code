@@ -138,7 +138,6 @@ def model_test(dataArr, labelArr, w, b):
         xi = dataMat[i]
 
         #获得该样本标记
-
         yi = labelMat[i]
 
         #获得运算结果

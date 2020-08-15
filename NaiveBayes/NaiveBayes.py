@@ -24,21 +24,26 @@ def loadData(fileName):
     '''
     #存放数据及标记
     dataArr = []; labelArr = []
+
     #读取文件
     fr = open(fileName)
+
     #遍历文件中的每一行
     for line in fr.readlines():
         #获取当前行，并按“，”切割成字段放入列表中
         #strip：去掉每行字符串首尾指定的字符（默认空格或换行符）
         #split：按照指定的字符将字符串切割成每个字段，返回列表形式
         curLine = line.strip().split(',')
+
         #将每行中除标记外的数据放入数据集中（curLine[0]为标记信息）
         #在放入的同时将原先字符串形式的数据转换为整型
         #此外将数据进行了二值化处理，大于128的转换成1，小于的转换成0，方便后续计算
         dataArr.append([int(int(num) > 128) for num in curLine[1:]])
+
         #将标记信息放入标记集中
         #放入的同时将标记转换为整型
         labelArr.append(int(curLine[0]))
+
     #返回数据集和标记
     return dataArr, labelArr
 
@@ -51,20 +56,25 @@ def NaiveBayes(Py, Px_y, x):
     :return: 返回所有label的估计概率
     '''
     #设置特征数目
-    featrueNum = 784
+    featrueNum = 784  #数据列值
+
     #设置类别数目
     classNum = 10
+
     #建立存放所有标记的估计概率数组
     P = [0] * classNum
+
     #对于每一个类别，单独估计其概率
     for i in range(classNum):
         #初始化sum为0，sum为求和项。
         #在训练过程中对概率进行了log处理，所以这里原先应当是连乘所有概率，最后比较哪个概率最大
         #但是当使用log处理时，连乘变成了累加，所以使用sum
         sum = 0
+
         #获取每一个条件概率值，进行累加
         for j in range(featrueNum):
             sum += Px_y[i][j][x[j]]
+
         #最后再和先验概率相加（也就是式4.7中的先验概率乘以后头那些东西，乘法因为log全变成了加法）
         P[i] = sum + Py[i]
 
@@ -84,14 +94,17 @@ def model_test(Py, Px_y, testDataArr, testLabelArr):
     '''
     #错误值计数
     errorCnt = 0
+
     #循环遍历测试集中的每一个样本
     for i in range(len(testDataArr)):
         #获取预测值
         presict = NaiveBayes(Py, Px_y, testDataArr[i])
+
         #与答案进行比较
         if presict != testLabelArr[i]:
             #若错误  错误值计数加1
             errorCnt += 1
+
     #返回准确率
     return 1 - (errorCnt / len(testDataArr))
 
@@ -106,12 +119,14 @@ def getAllProbability(trainDataArr, trainLabelArr):
     #设置样本特诊数目，数据集中手写图片为28*28，转换为向量是784维。
     # （我们的数据集已经从图像转换成784维的形式了，CSV格式内就是）
     featureNum = 784
+
     #设置类别数目，0-9共十个类别
     classNum = 10
 
     #初始化先验概率分布存放数组，后续计算得到的P(Y = 0)放在Py[0]中，以此类推
     #数据长度为10行1列
     Py = np.zeros((classNum, 1))
+
     #对每个类别进行一次循环，分别计算它们的先验概率分布
     #计算公式为书中"4.2节 朴素贝叶斯法的参数估计 公式4.8"
     for i in range(classNum):
@@ -126,6 +141,7 @@ def getAllProbability(trainDataArr, trainLabelArr):
         #(len(trainLabelArr) + 10)：标签集的总长度+10.
         #((np.sum(np.mat(trainLabelArr) == i)) + 1) / (len(trainLabelArr) + 10)：最后求得的先验概率
         Py[i] = ((np.sum(np.mat(trainLabelArr) == i)) + 1) / (len(trainLabelArr) + 10)
+
     #转换为log对数形式
     #log书中没有写到，但是实际中需要考虑到，原因是这样：
     #最后求后验概率估计的时候，形式是各项的相乘（“4.1 朴素贝叶斯法的学习” 式4.7），这里存在两个问题：1.某一项为0时，结果为0.
@@ -141,28 +157,32 @@ def getAllProbability(trainDataArr, trainLabelArr):
     #用于计算式4.10的分子，至于分子的+1以及分母的计算在下方第二个大For内
     #初始化为全0矩阵，用于存放所有情况下的条件概率
     Px_y = np.zeros((classNum, featureNum, 2))
+
     #对标记集进行遍历
     for i in range(len(trainLabelArr)):
         #获取当前循环所使用的标记
         label = trainLabelArr[i]
+
         #获取当前要处理的样本
         x = trainDataArr[i]
-        #对该样本的每一维特诊进行遍历
+
+        #对该样本的每一维特征进行遍历
         for j in range(featureNum):
             #在矩阵中对应位置加1
             #这里还没有计算条件概率，先把所有数累加，全加完以后，在后续步骤中再求对应的条件概率
             Px_y[label][j][x[j]] += 1
-
 
     #第二个大for，计算式4.10的分母，以及分子和分母之间的除法
     #循环每一个标记（共10个）
     for label in range(classNum):
         #循环每一个标记对应的每一个特征
         for j in range(featureNum):
-            #获取y=label，第j个特诊为0的个数
+            #获取y=label，第j个特征为0的个数
             Px_y0 = Px_y[label][j][0]
-            #获取y=label，第j个特诊为1的个数
+
+            #获取y=label，第j个特征为1的个数
             Px_y1 = Px_y[label][j][1]
+            
             #对式4.10的分子和分母进行相除，再除之前依据贝叶斯估计，分母需要加上2（为每个特征可取值个数）
             #分别计算对于y= label，x第j个特征为0和1的条件概率分布
             Px_y[label][j][0] = np.log((Px_y0 + 1) / (Px_y0 + Px_y1 + 2))
@@ -192,5 +212,6 @@ if __name__ == "__main__":
 
     #打印准确率
     print('the accuracy is:', accuracy)
+    
     #打印时间
     print('time span:', time.time() -start)

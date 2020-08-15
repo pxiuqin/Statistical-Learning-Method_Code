@@ -27,19 +27,24 @@ def loadData(fileName):
     :return: 数据集和标签集
     '''
     print('start read file')
+
     #存放数据及标记
     dataArr = []; labelArr = []
+
     #读取文件
     fr = open(fileName)
+
     #遍历文件中的每一行
     for line in fr.readlines():
         #获取当前行，并按“，”切割成字段放入列表中
         #strip：去掉每行字符串首尾指定的字符（默认空格或换行符）
         #split：按照指定的字符将字符串切割成每个字段，返回列表形式
         curLine = line.strip().split(',')
+
         #将每行中除标记外的数据放入数据集中（curLine[0]为标记信息）
         #在放入的同时将原先字符串形式的数据转换为整型
         dataArr.append([int(num) for num in curLine[1:]])
+
         #将标记信息放入标记集中
         #放入的同时将标记转换为整型
         labelArr.append(int(curLine[0]))
@@ -79,12 +84,15 @@ def getClosest(trainDataMat, trainLabelMat, x, topK):
     #列表的长度为训练集的长度，distList[i]表示x与训练集中第
     ## i个样本的距离
     distList = [0] * len(trainLabelMat)
+
     #遍历训练集中所有的样本点，计算与x的距离
     for i in range(len(trainDataMat)):
         #获取训练集中当前样本的向量
         x1 = trainDataMat[i]
+
         #计算向量x与训练集样本x的距离
         curDist = calcDist(x1, x)
+
         #将距离放入对应的列表位置中
         distList[i] = curDist
 
@@ -104,10 +112,12 @@ def getClosest(trainDataMat, trainLabelMat, x, topK):
     #所以计算时间需要很长，所以如果要提升时间，在这里优化的意义不大。（当然不是说就可以不优化了，
     #主要是我太懒了）
     topKList = np.argsort(np.array(distList))[:topK]        #升序排序
+
     #建立一个长度时的列表，用于选择数量最多的标记
     #3.2.4提到了分类决策使用的是投票表决，topK个标记每人有一票，在数组中每个标记代表的位置中投入
     #自己对应的地方，随后进行唱票选择最高票的标记
     labelList = [0] * 10
+
     #对topK个索引进行遍历
     for index in topKList:
         #trainLabelMat[index]：在训练集标签中寻找topK元素索引对应的标记
@@ -115,6 +125,7 @@ def getClosest(trainDataMat, trainLabelMat, x, topK):
         #labelList[int(trainLabelMat[index])]：找到标记在labelList中对应的位置
         #最后加1，表示投了一票
         labelList[int(trainLabelMat[index])] += 1
+
     #max(labelList)：找到选票箱中票数最多的票数值
     #labelList.index(max(labelList))：再根据最大值在列表中找到该值对应的索引，等同于预测的标记
     return labelList.index(max(labelList))
@@ -131,12 +142,14 @@ def model_test(trainDataArr, trainLabelArr, testDataArr, testLabelArr, topK):
     :return: 正确率
     '''
     print('start test')
+
     #将所有列表转换为矩阵形式，方便运算
     trainDataMat = np.mat(trainDataArr); trainLabelMat = np.mat(trainLabelArr).T
     testDataMat = np.mat(testDataArr); testLabelMat = np.mat(testLabelArr).T
 
-    #错误值技术
+    #错误值计数
     errorCnt = 0
+
     #遍历测试集，对每个测试集样本进行测试
     #由于计算向量与向量之间的时间耗费太大，测试集有6000个样本，所以这里人为改成了
     #测试200个样本点，如果要全跑，将行注释取消，再下一行for注释即可，同时下面的print
@@ -145,10 +158,13 @@ def model_test(trainDataArr, trainLabelArr, testDataArr, testLabelArr, topK):
     for i in range(200):
         # print('test %d:%d'%(i, len(trainDataArr)))
         print('test %d:%d' % (i, 200))
+
         #读取测试集当前测试样本的向量
         x = testDataMat[i]
+
         #获取预测的标记
         y = getClosest(trainDataMat, trainLabelMat, x, topK)
+
         #如果预测标记与实际标记不符，错误值计数加1
         if y != testLabelMat[i]: errorCnt += 1
 
@@ -163,15 +179,18 @@ if __name__ == "__main__":
 
     #获取训练集
     trainDataArr, trainLabelArr = loadData('../Mnist/mnist_train.csv')
+
     #获取测试集
     testDataArr, testLabelArr = loadData('../Mnist/mnist_test.csv')
+
     #计算测试集正确率
     accur = model_test(trainDataArr, trainLabelArr, testDataArr, testLabelArr, 25)
+
     #打印正确率
     print('accur is:%d'%(accur * 100), '%')
 
-    end = time.time()
     #显示花费时间
+    end = time.time()
     print('time span:', end - start)
 
 
