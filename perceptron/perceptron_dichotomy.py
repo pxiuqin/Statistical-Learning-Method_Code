@@ -158,10 +158,10 @@ if __name__ == '__main__':
     start = time.time()
 
     #获取训练集及标签
-    trainData, trainLabel = loadData('d:\codes\opensource\ML\Statistical-Learning-Method_Code\Mnist\mnist_train.csv')
+    trainData, trainLabel = loadData('../Mnist/mnist_train.csv')
 
     #获取测试集及标签
-    testData, testLabel = loadData('d:\codes\opensource\ML\Statistical-Learning-Method_Code\Mnist\mnist_test.csv')
+    testData, testLabel = loadData('../Mnist/mnist_test.csv')
 
     #训练获得权重
     w, b = perceptron(trainData, trainLabel, iter = 30)

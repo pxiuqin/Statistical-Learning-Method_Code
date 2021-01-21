@@ -254,10 +254,10 @@ if __name__ == '__main__':
     start = time.time()
 
     #依据现有训练集统计PI、A、B
-    PI, A, B = trainParameter('HMMTrainSet.txt')
+    PI, A, B = trainParameter('./HMM/HMMTrainSet.txt')
 
     #读取测试文章
-    artical = loadArticle('testArtical.txt')
+    artical = loadArticle('./HMM/testArtical.txt')
 
     #打印原文
     print('-------------------原文----------------------')
